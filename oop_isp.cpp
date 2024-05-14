@@ -182,13 +182,30 @@ class Vehicul
         {
             mentenanta.push_back(ment);
         }
-        
+
         void addDepou(Depou *depou)
         {
             this->depouApartenenta = depou;
         }
+        
+        int getId() const
+        {
+            return this->id;
+        }
+        
+        string getNrParc() const
+        {
+            return this->numar_parc;
+        }
+        
+        tip_vehicul getTipVehicul() const
+        {
+            return this->tipVehicul;
+        }
+        
+        
 };
-
+ 
 class punct_orientare
 {
     private:
@@ -274,6 +291,21 @@ class Ruta
         {
             trasee_posibile.push_back(trasee_pos);
         }
+        
+        int getRuta() const
+        {
+            return this->id;
+        }
+        
+        list<Vehicul> getVehActive() const
+        {
+            return this->vehicule_active;
+        }
+        
+        tip_ruta getTipRuta() const
+        {
+            return this->tipRuta;
+        }
 };
 
 class Angajat
@@ -335,6 +367,13 @@ class Depou
         }
 };
 
+list<Ruta> ruteGestiune;
+
+void addRute(const Ruta& ruta) 
+{
+    ruteGestiune.push_back(ruta);
+}
+
 int LoadData()
 {
     Coordonate *cords = new Coordonate(44.4295590, 25.9774500, 80.0, "Str. Preciziei 19-21", 19, "Sector 6", "Bucuresti", "Bucuresti-Ilfov", "Romania");
@@ -351,6 +390,8 @@ int LoadData()
     vehicul->adaugareMentenanta(*ment);
     
     Ruta *ruta = new Ruta(41, neelec_mixt, "Fara comentarii");
+    
+    Ruta *ruta2 = new Ruta(1, elect_tr_mixt, "Fara comentarii");
     
     ruta->addVehiculeActive(*vehicul);
     
@@ -370,14 +411,153 @@ int LoadData()
     
     ruta->addTraseePos(*traseu);
     
+    addRute(*ruta);
+    
+    addRute(*ruta2);
+    
     return 1;
 }
 
-void CautaRuta(string arg)
-{
-    
+list<Ruta> cautaRuta(const list<Ruta>& rute, const int rutaCautata) {
+    list<Ruta> rezultat;
+
+    for (auto& ruta : rute) {
+        if (ruta.getRuta() == rutaCautata) {
+            rezultat.push_back(ruta);
+        }
+    }
+
+    return rezultat;
 }
 
+void CautaRuta(string arg)
+{   
+    int idCautat = stoi(arg);
+    
+    list<Ruta> rez = cautaRuta(ruteGestiune, idCautat);
+    
+    if(!rez.empty())
+    {
+        string rezList;
+        for (const auto& ruta : rez) 
+        {
+            switch(ruta.getTipRuta())
+            {
+                case neelec_bul:
+                {
+                    rezList = "neelecritificata, bulevard";
+                    break;
+                }
+                case neelec_strsec:
+                {
+                    rezList = "neelecritificata, strada secundara";
+                    break;
+                }
+                case neelec_mixt:
+                {
+                    rezList = "neelecritificata, mixta";
+                    break;
+                }
+                case elect_tr_bul:
+                {
+                    rezList = "elecritificata, tramvai, bulevard";
+                    break;
+                }
+                case elect_tr_strsec:
+                {
+                    rezList = "elecritificata, tramvai, strada secundara";
+                    break;
+                }
+                case elect_tr_mixt:
+                {
+                    rezList = "elecritificata, tramvai, mixta";
+                    break;
+                }
+                case elect_trol_bul:
+                {
+                    rezList = "elecritificata, troleibuz, bulevard";
+                    break;
+                }
+                case elect_trol_strsec:
+                {
+                    rezList = "elecritificata, troleibuz, strada secundara";
+                    break;
+                }
+                case elect_trol_mixt:
+                {
+                    rezList = "elecritificata, troleibuz, mixta";
+                    break;
+                }
+            }
+            
+            cout << "Ruta: " << ruta.getRuta() << ", Tip ruta: " << rezList << endl;
+            
+            list<Vehicul> vehicule = ruta.getVehActive();
+            
+            for (const auto& vehicul : vehicule) 
+            {
+                switch(vehicul.getTipVehicul())
+                {
+                    autobuzDiesel:
+                    {
+                        rezList = "Autobuz diesel";
+                        break;
+                    }
+                    autobuzElectric:
+                    {
+                        rezList = "Autobuz electric";
+                        break;
+                    }
+                    autobuzHibrid:
+                    {
+                        rezList = "Autobuz hibrid";
+                        break;
+                    }
+                    troleibuz:
+                    {
+                        rezList = "Troleibuz";
+                        break;
+                    }
+                    tr_mono_dir:
+                    {
+                        rezList = "Travai mono directional";
+                        break;
+                    }
+                    tr_bidirectional:
+                    {
+                        rezList = "Tramvai bidirectional";
+                        break;
+                    }
+                }
+            
+                cout << "ID vehicul: " << vehicul.getId() << ", Număr parc: " << vehicul.getNrParc() << ", Tip vehicul: " << rezList << endl;
+            }
+        }
+    }
+    else
+    {
+        cout << "Ruta cu ID-ul " << idCautat << " nu a fost gasita." << endl;
+    }
+}
+
+const string adminUser = "admin";
+const string adminPw = "1234";
+
+void Login(string user, string parola)
+{
+    if(user == adminUser && parola == adminPw)
+    {
+        printf("Logare cont Administrator cu succes!");
+    }
+    else
+    {
+        printf("Nume utilizator sau parola gresita!");
+    }
+    
+    printf("1.Stergere ruta\n2.Actualizare ruta");
+    
+    return;
+}
 
 int main()
 {
@@ -385,7 +565,7 @@ int main()
     
     printf("Bine ai venit in aplicatia STB!\nCe actiune doresti sa realizezi?\n");
     _cin:
-    printf("1. Cauta rute\n2.Cauta linie\n3.Cauta punct preluare\n4.Logare Administrator\n");
+    printf("1.Cauta rute\n2.Cauta linie\n3.Cauta punct preluare\n4.Logare Administrator\n");
     int iRaspuns;
     cin >> iRaspuns;
     
@@ -397,7 +577,7 @@ int main()
         {
             printf("Introdu ruta de interes:\n");
             cin >> sRaspuns;
-            //CautaRuta(sRaspuns);
+            CautaRuta(sRaspuns);
             break;
         }
         case 2:
@@ -420,7 +600,7 @@ int main()
             string sTemp;
             cin >> sRaspuns;
             cin >> sTemp;
-            //Login(sRaspuns, sTemp);
+            Login(sRaspuns, sTemp);
             break;
         }
         default:
@@ -431,3 +611,4 @@ int main()
     
     return 0;
 }
+
