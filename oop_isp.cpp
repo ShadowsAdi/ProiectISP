@@ -219,11 +219,15 @@ class Traseu
         list<punct_orientare> puncteOrientare;
         string directia_de_mers;
     public:
-        Traseu(int id, list<punct_orientare> puncteOrientare, string directia_de_mers)
+        Traseu(int id, string directia_de_mers)
         {
             this->id = id;
-            this->puncteOrientare = puncteOrientare;
             this->directia_de_mers = directia_de_mers;
+        }
+        
+        void setPunctOrientare(punct_orientare &pctOrientare)
+        {
+            puncteOrientare.push_back(pctOrientare);
         }
 };
 
@@ -239,13 +243,10 @@ class Ruta
         list<Traseu> trasee_posibile;
         string comentarii;
     public:
-        Ruta(int id, tip_ruta tipRuta, list<Vehicul> vehicule_active, list<Vehicul> vehicule_arondate, list<Traseu> trasee_posibile, string comentarii)
+        Ruta(int id, tip_ruta tipRuta, string comentarii)
         {
             this->id = id;
             this->tipRuta = tipRuta;
-            this->vehicule_active = vehicule_active;
-            this->vehicule_arondate = vehicule_arondate;
-            this->trasee_posibile = trasee_posibile;
             this->comentarii = comentarii;
         }
 
@@ -257,6 +258,21 @@ class Ruta
         void addTraseu(Traseu* traseu)
         {
             this->traseu_urmarit = traseu;
+        }
+        
+        void addVehiculeActive(const Vehicul& veh_active) 
+        {
+            vehicule_active.push_back(veh_active);
+        }
+        
+        void addVehiculeArondate(const Vehicul& veh_arondate) 
+        {
+            vehicule_arondate.push_back(veh_arondate);
+        }
+        
+        void addTraseePos(const Traseu& trasee_pos) 
+        {
+            trasee_posibile.push_back(trasee_pos);
         }
 };
 
@@ -271,7 +287,7 @@ class Angajat
         Ruta *ruta_preferata;
         Vehicul *vehicul_preferat;
     public:
-        Angajat(tip_angajat tipAngajat, Depou *depouApartenenta, Data *dataAngajarii, string nume, string prenume, Ruta *ruta_preferata, Vehicul *vehicul_preferat)
+        Angajat(tip_angajat tipAngajat, Data *dataAngajarii, string nume, string prenume, Ruta *ruta_preferata, Vehicul *vehicul_preferat)
         {
             this->tipAngajat = tipAngajat;
             this->depouApartenenta = depouApartenenta;
@@ -280,6 +296,21 @@ class Angajat
             this->prenume = prenume;
             this->ruta_preferata = ruta_preferata;
             this->vehicul_preferat = vehicul_preferat;
+        }
+        
+        void setDepou(Depou *depouApartenenta)
+        {
+            this->depouApartenenta = depouApartenenta;
+        }
+        
+        void setVehiculPref(Vehicul *vehicul_preferat)
+        {
+            this->vehicul_preferat = vehicul_preferat;
+        }
+        
+        void setRutaPref(Ruta *ruta_preferata)
+        {
+            this->ruta_preferata = ruta_preferata;
         }
 };
 
@@ -295,15 +326,11 @@ class Depou
         list<Vehicul> vehiculMentenanta;
         string comentarii;
     public:
-        Depou(int id, Coordonate *amplasament, list<Vehicul> vehiculeGestiune, list<Angajat> angajati, list<Ruta> ruteGestiune, int capacitateMentenanta, list<Vehicul> vehiculMentenanta, string comentarii)
+        Depou(int id, Coordonate *amplasament, int capacitateMentenanta, string comentarii)
         {
             this->id = id;
             this->amplasament = amplasament;
-            this->vehiculeGestiune = vehiculeGestiune;
-            this->angajati = angajati;
-            this->ruteGestiune = ruteGestiune;
             this->capacitateMentenanta = capacitateMentenanta;
-            this->vehiculMentenanta = vehiculMentenanta;
             this->comentarii = comentarii;
         }
 };
@@ -320,22 +347,45 @@ int LoadData()
 
     coordonateOrientare *coordCur = new coordonateOrientare(44.46344643, 26.07423449, 91.0);
     
-    Vehicul *vehicul = new Vehicul(1, autobuzDiesel, nullptr, "13", "Otokar", "", data, 12.3, 31, 106, coordCur, 15, "http://localhost:8888", "Fara comentarii");
-    vehicul->adaugareMentenanta(ment);
+    Vehicul *vehicul = new Vehicul(1, autobuzDiesel, "13", "Otokar", "", data, 12.3, 31, 106, coordCur, 15, "http://localhost:8888", "Fara comentarii");
+    vehicul->adaugareMentenanta(*ment);
     
-    Ruta *ruta = new Ruta(41, neelec_mixt, )
+    Ruta *ruta = new Ruta(41, neelec_mixt, "Fara comentarii");
     
-    Depou depou = new Depou(41, cords, );
+    ruta->addVehiculeActive(*vehicul);
+    
+    Depou *depou = new Depou(41, cords, 5, "Fara comentarii");
+    
+    punct_orientare *PunctOrientare = new punct_orientare(41, punct_trecere, autobuz, lateral_dreapta);
+    
+    Traseu *traseu = new Traseu(41, "Nord-Sud");
+    
+    traseu->setPunctOrientare(*PunctOrientare);
+    
+    ruta->addDepou(depou);
+    
+    ruta->addTraseu(traseu);
+    
+    ruta->addVehiculeActive(*vehicul);
+    
+    ruta->addTraseePos(*traseu);
     
     return 1;
 }
+
+void CautaRuta(string arg)
+{
+    
+}
+
 
 int main()
 {
     LoadData();
     
     printf("Bine ai venit in aplicatia STB!\nCe actiune doresti sa realizezi?\n");
-    printf("1. Cauta rute\n2.Cauta linie\n3.Cauta destinatie\n4.Cauta punct preluare\n5.Logare Administrator\n");
+    _cin:
+    printf("1. Cauta rute\n2.Cauta linie\n3.Cauta punct preluare\n4.Logare Administrator\n");
     int iRaspuns;
     cin >> iRaspuns;
     
@@ -359,19 +409,12 @@ int main()
         }
         case 3:
         {
-            printf("Introdu destinatia de inters:\n");
-            cin >> sRaspuns;
-            CautaRutaByDest(sRaspuns);
-            break;
-        }
-        case 4:
-        {
             printf("Introdu punctul de preluare:\n");
             cin >> sRaspuns;
             //CautaRutaByPct(sRaspuns);
             break;
         }
-        case 5:
+        case 4:
         {
             printf("Introdu numele si parola de Administrator:\n");
             string sTemp;
@@ -380,13 +423,11 @@ int main()
             //Login(sRaspuns, sTemp);
             break;
         }
-        
+        default:
+        {
+            goto _cin;
+        }
     }
     
     return 0;
-}
-
-void CautaRuta(string arg)
-{
-    
 }
